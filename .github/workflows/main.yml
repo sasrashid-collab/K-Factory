@@ -1,0 +1,23 @@
+name: K-Store APK Generator
+on:
+  repository_dispatch:
+    types: [build_apk]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Create User App
+        run: |
+          echo "Building app with code: ${{ github.event.client_payload.code }}"
+          echo "${{ github.event.client_payload.code }}" > user_app.py
+          # لێرەدا لە داهاتوودا کتێبخانەی Kivy یان Buildozer زیاد دەکەین بۆ APK
+          echo "✅ ئەپەکە بە سەرکەوتوویی دروست کرا!"
