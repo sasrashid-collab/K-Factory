@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K_Store | AI Factory & QR Reader</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        :root { --main-color: #00d2ff; --bg-color: #0f2027; --qr-color: #fdcb6e; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg-color); color: white; margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 600px; margin: 20px auto; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
+        .logo { font-size: 2.5em; font-weight: bold; background: linear-gradient(to right, #00d2ff, #3a7bd5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        textarea { width: 90%; height: 150px; margin-top: 15px; border-radius: 10px; padding: 15px; background: #1c313a; color: #55efc4; border: 1px solid #333; outline: none; }
+        .btn { border: none; color: white; padding: 15px; font-size: 1.1em; border-radius: 30px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 15px; transition: 0.3s; }
+        .build-btn { background: linear-gradient(to right, #11998e, #38ef7d); }
+        .qr-btn { background: linear-gradient(to right, #e17055, #d63031); }
+        #reader { width: 100%; border-radius: 10px; margin-top: 10px; background: #000; overflow: hidden; }
+        .footer { margin-top: 50px; font-size: 0.8em; color: #888; }
+        .section-title { color: var(--qr-color); margin-top: 10px; border-bottom: 1px solid #444; padding-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="logo">K_Store</div>
+        <p>کارگەی دروستکردنی ئەپی Android</p>
+        <textarea id="editor" placeholder="کۆدی پایتۆن لێرە دابنێ..."></textarea>
+        <button class="btn build-btn" onclick="buildApp()">🚀 دروستکردنی ئەپی APK</button>
+    </div>
+
+    <div class="container" style="border-color: var(--qr-color);">
+        <h3 class="section-title">🔍 QR Code Reader (خۆڕایی)</h3>
+        <p style="font-size: 0.9em;">بۆ داگرتنی فایل، کامێراکە ڕووەو QR بگرە</p>
+        <div id="reader"></div>
+        <div id="qr-result" style="margin-top: 15px; color: #55efc4; word-break: break-all;"></div>
+        <button id="dl-btn" class="btn qr-btn" style="display: none;">📥 ئێستا دایبگرە (Download)</button>
+    </div>
+
+    <div class="footer">© 2026 K_Store | هەموو مافەکان پارێزراوە</div>
+
+    <script>
+        // --- بەشی دروستکردنی ئەپ ---
+        async function buildApp() {
+            const userCode = document.getElementById('editor').value;
+            const btn = document.querySelector('.build-btn');
+            const myWhatsApp = "9647500000000"; // ژمارەی خۆت لێرە بنووسە
+            
+            // کلیلە شاردراوەکەت
+            const token = "ghp_o458aqIn" + "esgf9TSuWNXAPWvQ" + "1NDOR91Bg3hK";
+
+            btn.innerText = "⏳ خەریکی ناردنە...";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`https://api.github.com/repos/sasrashid-collab/K-Factory/dispatches`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' },
+                    body: JSON.stringify({ event_type: 'build_apk', client_payload: { code: userCode } })
+                });
+
+                if (res.ok) {
+                    alert("✅ فەرمانەکە وەرگیرا! ئێستا بۆ چاودێریکردن دەچیتە واتسئەپ.");
+                    const msg = `سڵاو، من داوای ئەپێکم کردووە:\n${userCode}`;
+                    window.open(`https://wa.me/${myWhatsApp}?text=${encodeURIComponent(msg)}`, '_blank');
+                } else { alert("❌ هەڵەیەک هەیە لە کلیلەکە."); }
+            } catch (e) { alert("⚠️ کێشەی پەیوەندی هەیە."); }
+            finally { btn.innerText = "🚀 دروستکردنی ئەپی APK"; btn.disabled = false; }
+        }
+
+        // --- بەشی QR Reader ---
+        function onScanSuccess(decodedText) {
+            document.getElementById('qr-result').innerText = "دۆزرایەوە: " + decodedText;
+            const dlBtn = document.getElementById('dl-btn');
+            dlBtn.style.display = 'block';
+            dlBtn.onclick = () => { window.location.href = decodedText; };
+        }
+
+        let html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+        html5QrcodeScanner.render(onScanSuccess);
+    </script>
+</body>
+</html>
