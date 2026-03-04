@@ -3,32 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>K-Store | AI Factory</title>
+    <title>K-Store | Manual Camera</title>
     <style>
         :root { --primary: #00d2ff; --bg: #0b1418; --card-bg: #16242a; }
         body { font-family: sans-serif; background: var(--bg); color: white; text-align: center; padding: 15px; margin: 0; }
-        .header { padding: 15px 0; border-bottom: 1px solid var(--card-bg); }
-        .store-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 20px 0; }
-        .store-item { background: var(--card-bg); padding: 10px; border-radius: 10px; font-size: 0.8em; border: 1px solid #243b46; }
+        .header { padding: 15px 0; border-bottom: 1px solid var(--card-bg); margin-bottom: 20px; }
+        .store-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+        .store-item { background: var(--card-bg); padding: 15px 5px; border-radius: 12px; border: 1px solid #243b46; font-size: 0.9em; }
         
         /* شاردنەوەی کامێرا لە سەرەتادا */
         #camera-section { display: none; margin-top: 20px; }
-        .camera-box { width: 100%; max-width: 400px; margin: 0 auto; border: 2px solid var(--primary); border-radius: 15px; overflow: hidden; background: #000; position: relative; }
+        .camera-box { width: 100%; max-width: 400px; margin: 0 auto; border: 3px solid var(--primary); border-radius: 20px; overflow: hidden; background: #000; }
         video { width: 100%; display: block; }
         
-        .btn { padding: 12px 25px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; margin: 10px 5px; transition: 0.3s; }
-        .btn-open { background: var(--primary); color: black; }
+        .btn { padding: 15px 30px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; margin: 10px 5px; font-size: 1em; }
+        .btn-open { background: var(--primary); color: #000; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3); }
         .btn-close { background: #ff7675; color: white; }
-        .btn-build { width: 100%; background: linear-gradient(45deg, #00d2ff, #3a7bd5); color: white; margin-top: 20px; }
         
-        textarea { width: 100%; height: 100px; background: #050a0c; color: #55efc4; border: 1px solid #243b46; border-radius: 10px; padding: 10px; margin-top: 15px; box-sizing: border-box; }
+        textarea { width: 100%; height: 120px; background: #050a0c; color: #55efc4; border: 1px solid #243b46; border-radius: 12px; padding: 12px; margin-top: 20px; box-sizing: border-box; outline: none; }
+        .btn-build { width: 100%; background: linear-gradient(45deg, #00d2ff, #3a7bd5); color: white; margin-top: 15px; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1>K-Store</h1>
-        <p>کارگەی دروستکردنی ئەپ</p>
+        <p>کارگەی زیرەکی ئەپڵیکەیشن</p>
     </div>
 
     <div class="store-container">
@@ -37,57 +37,61 @@
         <div class="store-item">📱 ئەپەکان</div>
     </div>
 
-    <button id="toggleBtn" class="btn btn-open" onclick="startCamera()">📷 کردنەوەی کامێرا بۆ سکان</button>
+    <button id="openBtn" class="btn btn-open" onclick="startCamera()">📷 کردنەوەی کامێرا</button>
     <button id="closeBtn" class="btn btn-close" onclick="stopCamera()" style="display:none;">✖️ داخستنی کامێرا</button>
 
     <div id="camera-section">
         <div class="camera-box">
             <video id="video" autoplay playsinline></video>
         </div>
-        <p id="status-msg" style="font-size: 0.8em; color: #55efc4;"></p>
+        <p id="status" style="color: #55efc4; font-size: 0.9em; margin-top: 10px;">✅ کامێرا چالاکە</p>
     </div>
 
-    <div style="background: var(--card-bg); padding: 15px; border-radius: 15px; margin-top: 20px;">
+    <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-top: 25px;">
         <textarea id="pythonCode" placeholder="کۆدی پایتۆن لێرە بنووسە..."></textarea>
-        <button class="btn btn-build" onclick="alert('کۆد ناردرا بۆ Buildozer!')">دروستکردنی APK</button>
+        <button class="btn btn-build" onclick="alert('ناردرا بۆ مەکینەی Buildozer')">دروستکردنی ئەپ (APK)</button>
     </div>
 
     <script>
-        let currentStream = null;
+        let streamObject = null;
 
         async function startCamera() {
             const video = document.getElementById('video');
             const section = document.getElementById('camera-section');
-            const openBtn = document.getElementById('toggleBtn');
+            const openBtn = document.getElementById('openBtn');
             const closeBtn = document.getElementById('closeBtn');
 
             try {
-                currentStream = await navigator.mediaDevices.getUserMedia({ 
+                // تەنها کاتێک کلیک دەکەیت داوای مۆڵەت دەکات
+                streamObject = await navigator.mediaDevices.getUserMedia({ 
                     video: { facingMode: "environment" } 
                 });
-                video.srcObject = currentStream;
+                video.srcObject = streamObject;
                 section.style.display = "block";
                 openBtn.style.display = "none";
                 closeBtn.style.display = "inline-block";
             } catch (err) {
-                alert("ناتوانم کامێرا بکەمەوە!");
+                alert("هەڵە لە کردنەوەی کامێرا: " + err.message);
             }
         }
 
         function stopCamera() {
             const video = document.getElementById('video');
             const section = document.getElementById('camera-section');
-            const openBtn = document.getElementById('toggleBtn');
+            const openBtn = document.getElementById('openBtn');
             const closeBtn = document.getElementById('closeBtn');
 
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop()); // کوژاندنەوەی کامێرا بە تەواوی
+            if (streamObject) {
+                // لێرە کامێراکە بە تەواوی دەکوژێتەوە و چیتر پاتری ناخوات
+                streamObject.getTracks().forEach(track => track.stop());
                 video.srcObject = null;
             }
             section.style.display = "none";
             openBtn.style.display = "inline-block";
             closeBtn.style.display = "none";
         }
+        
+        // ئاگاداری: لێرە چیتر window.onload نییە، واتا کامێرا خۆکار نابێتەوە.
     </script>
 </body>
 </html>
