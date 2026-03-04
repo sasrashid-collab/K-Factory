@@ -3,95 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>K-Store | Manual Camera</title>
+    <title>K_Store Smart Cam</title>
     <style>
-        :root { --primary: #00d2ff; --bg: #0b1418; --card-bg: #16242a; }
-        body { font-family: sans-serif; background: var(--bg); color: white; text-align: center; padding: 15px; margin: 0; }
-        .header { padding: 15px 0; border-bottom: 1px solid var(--card-bg); margin-bottom: 20px; }
-        .store-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
-        .store-item { background: var(--card-bg); padding: 15px 5px; border-radius: 12px; border: 1px solid #243b46; font-size: 0.9em; }
-        
-        /* شاردنەوەی کامێرا لە سەرەتادا */
-        #camera-section { display: none; margin-top: 20px; }
-        .camera-box { width: 100%; max-width: 400px; margin: 0 auto; border: 3px solid var(--primary); border-radius: 20px; overflow: hidden; background: #000; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0b0f19; color: white; text-align: center; margin: 0; padding: 20px; overflow-x: hidden; }
+        .camera-box { 
+            position: relative; width: 100%; max-width: 450px; margin: 15px auto; 
+            border: 3px solid #00d2ff; border-radius: 20px; overflow: hidden; 
+            background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
         video { width: 100%; display: block; }
+        .overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 180px; height: 180px; border: 2px dashed rgba(0, 210, 255, 0.5);
+            border-radius: 15px; pointer-events: none;
+        }
+        /* ستایلی نامەی ستاتوس (✔) */
+        #status-container {
+            display: none; position: relative; max-width: 300px; margin: 15px auto;
+            background: rgba(56, 239, 125, 0.2); border: 1px solid #38ef7d;
+            padding: 10px; border-radius: 10px; align-items: center; justify-content: space-between;
+        }
+        #status-text { color: #38ef7d; font-weight: bold; flex-grow: 1; }
+        .close-btn { cursor: pointer; color: white; font-size: 20px; margin-right: 10px; background: none; border: none; }
         
-        .btn { padding: 15px 30px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; margin: 10px 5px; font-size: 1em; }
-        .btn-open { background: var(--primary); color: #000; box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3); }
-        .btn-close { background: #ff7675; color: white; }
-        
-        textarea { width: 100%; height: 120px; background: #050a0c; color: #55efc4; border: 1px solid #243b46; border-radius: 12px; padding: 12px; margin-top: 20px; box-sizing: border-box; outline: none; }
-        .btn-build { width: 100%; background: linear-gradient(45deg, #00d2ff, #3a7bd5); color: white; margin-top: 15px; }
+        .btn { 
+            padding: 12px 25px; background: #00d2ff; color: #0b0f19; 
+            border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px;
+        }
     </style>
 </head>
 <body>
+    <h2 style="color: #00d2ff; margin-bottom: 5px;">K_Store</h2>
+    <p style="font-size: 0.9em; opacity: 0.8;">کارگەی زیرەک</p>
 
-    <div class="header">
-        <h1>K-Store</h1>
-        <p>کارگەی زیرەکی ئەپڵیکەیشن</p>
+    <div class="camera-box">
+        <video id="video" autoplay playsinline></video>
+        <div class="overlay"></div>
     </div>
 
-    <div class="store-container">
-        <div class="store-item">⚙️ سیستەم</div>
-        <div class="store-item">🎮 یاری</div>
-        <div class="store-item">📱 ئەپەکان</div>
+    <div id="status-container">
+        <span id="status-text"></span>
+        <button class="close-btn" onclick="hideStatus()">×</button>
     </div>
 
-    <button id="openBtn" class="btn btn-open" onclick="startCamera()">📷 کردنەوەی کامێرا</button>
-    <button id="closeBtn" class="btn btn-close" onclick="stopCamera()" style="display:none;">✖️ داخستنی کامێرا</button>
-
-    <div id="camera-section">
-        <div class="camera-box">
-            <video id="video" autoplay playsinline></video>
-        </div>
-        <p id="status" style="color: #55efc4; font-size: 0.9em; margin-top: 10px;">✅ کامێرا چالاکە</p>
-    </div>
-
-    <div style="background: var(--card-bg); padding: 20px; border-radius: 20px; margin-top: 25px;">
-        <textarea id="pythonCode" placeholder="کۆدی پایتۆن لێرە بنووسە..."></textarea>
-        <button class="btn btn-build" onclick="alert('ناردرا بۆ مەکینەی Buildozer')">دروستکردنی ئەپ (APK)</button>
-    </div>
+    <button class="btn" onclick="openBackCamera()">🔄 دەستپێکردنەوە</button>
 
     <script>
-        let streamObject = null;
+        const statusContainer = document.getElementById('status-container');
+        const statusText = document.getElementById('status-text');
 
-        async function startCamera() {
+        async function openBackCamera() {
             const video = document.getElementById('video');
-            const section = document.getElementById('camera-section');
-            const openBtn = document.getElementById('openBtn');
-            const closeBtn = document.getElementById('closeBtn');
-
             try {
-                // تەنها کاتێک کلیک دەکەیت داوای مۆڵەت دەکات
-                streamObject = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "environment" } 
+                if (video.srcObject) {
+                    video.srcObject.getTracks().forEach(track => track.stop());
+                }
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: { ideal: "environment" } } 
                 });
-                video.srcObject = streamObject;
-                section.style.display = "block";
-                openBtn.style.display = "none";
-                closeBtn.style.display = "inline-block";
+                video.srcObject = stream;
+                showStatus("✅ کامێرا چالاکە");
             } catch (err) {
-                alert("هەڵە لە کردنەوەی کامێرا: " + err.message);
+                showStatus("❌ کامێرا نەکرایەوە");
+                console.error(err);
             }
         }
 
-        function stopCamera() {
-            const video = document.getElementById('video');
-            const section = document.getElementById('camera-section');
-            const openBtn = document.getElementById('openBtn');
-            const closeBtn = document.getElementById('closeBtn');
-
-            if (streamObject) {
-                // لێرە کامێراکە بە تەواوی دەکوژێتەوە و چیتر پاتری ناخوات
-                streamObject.getTracks().forEach(track => track.stop());
-                video.srcObject = null;
-            }
-            section.style.display = "none";
-            openBtn.style.display = "inline-block";
-            closeBtn.style.display = "none";
+        function showStatus(msg) {
+            statusText.innerText = msg;
+            statusContainer.style.display = 'flex';
+            // دوای ٤ چرکە خۆی ون دەبێت ئەگەر لای نەنێیت
+            setTimeout(() => { hideStatus(); }, 4000);
         }
-        
-        // ئاگاداری: لێرە چیتر window.onload نییە، واتا کامێرا خۆکار نابێتەوە.
+
+        function hideStatus() {
+            statusContainer.style.display = 'none';
+        }
+
+        window.addEventListener('load', openBackCamera);
     </script>
 </body>
 </html>
