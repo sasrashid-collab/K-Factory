@@ -5,109 +5,89 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>K-Store | AI Factory</title>
     <style>
-        :root {
-            --primary: #00d2ff;
-            --secondary: #3a7bd5;
-            --bg: #0b1418;
-            --card-bg: #16242a;
-            --accent: #55efc4;
-        }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; }
-        .header { text-align: center; padding: 20px 0; border-bottom: 2px solid var(--card-bg); margin-bottom: 20px; }
-        .header h1 { color: var(--primary); margin: 0; font-size: 2.2em; letter-spacing: 2px; }
-        .header p { color: #888; margin-top: 5px; }
-
-        /* بەشی کۆگاکان */
-        .store-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 25px; }
-        .store-item { background: var(--card-bg); padding: 15px 5px; border-radius: 12px; text-align: center; border: 1px solid #243b46; transition: 0.3s; cursor: pointer; }
-        .store-item:active { transform: scale(0.95); background: var(--secondary); }
-        .store-item i { font-size: 28px; display: block; margin-bottom: 8px; }
-        .store-item span { font-size: 0.85em; font-weight: bold; }
-
-        /* بەشی کامێرا */
-        .camera-box { position: relative; width: 100%; max-width: 450px; margin: 0 auto 20px; border: 3px solid var(--primary); border-radius: 20px; overflow: hidden; background: #000; box-shadow: 0 0 15px rgba(0, 210, 255, 0.2); }
+        :root { --primary: #00d2ff; --bg: #0b1418; --card-bg: #16242a; }
+        body { font-family: sans-serif; background: var(--bg); color: white; text-align: center; padding: 15px; margin: 0; }
+        .header { padding: 15px 0; border-bottom: 1px solid var(--card-bg); }
+        .store-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 20px 0; }
+        .store-item { background: var(--card-bg); padding: 10px; border-radius: 10px; font-size: 0.8em; border: 1px solid #243b46; }
+        
+        /* شاردنەوەی کامێرا لە سەرەتادا */
+        #camera-section { display: none; margin-top: 20px; }
+        .camera-box { width: 100%; max-width: 400px; margin: 0 auto; border: 2px solid var(--primary); border-radius: 15px; overflow: hidden; background: #000; position: relative; }
         video { width: 100%; display: block; }
-        .scan-line { position: absolute; width: 100%; height: 2px; background: var(--accent); top: 0; left: 0; animation: scan 2s linear infinite; box-shadow: 0 0 8px var(--accent); }
-        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
-
-        /* بەشی نووسینی کۆد */
-        .editor-container { background: var(--card-bg); padding: 15px; border-radius: 15px; border: 1px solid #243b46; }
-        .editor-container h3 { margin-top: 0; color: var(--primary); font-size: 1em; }
-        textarea { width: 100%; height: 150px; background: #050a0c; color: var(--accent); border: 1px solid #243b46; border-radius: 10px; padding: 12px; box-sizing: border-box; font-family: 'Courier New', monospace; font-size: 14px; outline: none; }
         
-        .btn-build { width: 100%; padding: 16px; margin-top: 15px; border: none; border-radius: 12px; background: linear-gradient(45deg, var(--primary), var(--secondary)); color: white; font-weight: bold; cursor: pointer; font-size: 1.1em; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .btn { padding: 12px 25px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; margin: 10px 5px; transition: 0.3s; }
+        .btn-open { background: var(--primary); color: black; }
+        .btn-close { background: #ff7675; color: white; }
+        .btn-build { width: 100%; background: linear-gradient(45deg, #00d2ff, #3a7bd5); color: white; margin-top: 20px; }
         
-        #status-msg { margin-top: 15px; font-size: 0.9em; color: #fdcb6e; font-weight: bold; }
+        textarea { width: 100%; height: 100px; background: #050a0c; color: #55efc4; border: 1px solid #243b46; border-radius: 10px; padding: 10px; margin-top: 15px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1>K-Store</h1>
-        <p>سیستەمی ژیری دروستکردنی ئەپ</p>
+        <p>کارگەی دروستکردنی ئەپ</p>
     </div>
 
     <div class="store-container">
-        <div class="store-item" onclick="alert('کۆگای سیستەم و پڕۆگرامەکان کرایەوە')">
-            <i>⚙️</i><span>سیستەم</span>
-        </div>
-        <div class="store-item" onclick="alert('کۆگای یارییەکان کرایەوە')">
-            <i>🎮</i><span>یارییەکان</span>
-        </div>
-        <div class="store-item" onclick="alert('کۆگای ئەپەکان کرایەوە')">
-            <i>📱</i><span>ئەپەکان</span>
-        </div>
+        <div class="store-item">⚙️ سیستەم</div>
+        <div class="store-item">🎮 یاری</div>
+        <div class="store-item">📱 ئەپەکان</div>
     </div>
 
-    <div class="camera-box">
-        <div class="scan-line"></div>
-        <video id="video" autoplay playsinline></video>
-    </div>
-    <div id="status-msg">⏳ خەریکە کامێرای دواوە چالاک دەبێت...</div>
+    <button id="toggleBtn" class="btn btn-open" onclick="startCamera()">📷 کردنەوەی کامێرا بۆ سکان</button>
+    <button id="closeBtn" class="btn btn-close" onclick="stopCamera()" style="display:none;">✖️ داخستنی کامێرا</button>
 
-    <div class="editor-container">
-        <h3>🚀 کارگەی دروستکردنی APK</h3>
-        <textarea id="pythonCode" placeholder="کۆدی پایتۆن لێرە بنووسە (Kivy / KivyMD)..."></textarea>
-        <button class="btn-build" onclick="sendToBuildozer()">دروستکردنی ئەپ (Build APK)</button>
+    <div id="camera-section">
+        <div class="camera-box">
+            <video id="video" autoplay playsinline></video>
+        </div>
+        <p id="status-msg" style="font-size: 0.8em; color: #55efc4;"></p>
+    </div>
+
+    <div style="background: var(--card-bg); padding: 15px; border-radius: 15px; margin-top: 20px;">
+        <textarea id="pythonCode" placeholder="کۆدی پایتۆن لێرە بنووسە..."></textarea>
+        <button class="btn btn-build" onclick="alert('کۆد ناردرا بۆ Buildozer!')">دروستکردنی APK</button>
     </div>
 
     <script>
-        // چالاککردنی کامێرای دواوە بەبێ پرسیار
-        async function initCamera() {
+        let currentStream = null;
+
+        async function startCamera() {
             const video = document.getElementById('video');
-            const msg = document.getElementById('status-msg');
+            const section = document.getElementById('camera-section');
+            const openBtn = document.getElementById('toggleBtn');
+            const closeBtn = document.getElementById('closeBtn');
+
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: { exact: "environment" } } 
+                currentStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment" } 
                 });
-                video.srcObject = stream;
-                msg.innerText = "✅ کامێرای دواوە چالاکە و ئامادەیە بۆ سکان";
-                msg.style.color = "#55efc4";
+                video.srcObject = currentStream;
+                section.style.display = "block";
+                openBtn.style.display = "none";
+                closeBtn.style.display = "inline-block";
             } catch (err) {
-                try {
-                    const fallback = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                    video.srcObject = fallback;
-                    msg.innerText = "✅ کامێرا بە سەرکەوتوویی کرایەوە";
-                } catch (e) {
-                    msg.innerText = "❌ تکایە مۆڵەتی کامێرا بدە بە براوسەرەکە";
-                    msg.style.color = "#ff7675";
-                }
+                alert("ناتوانم کامێرا بکەمەوە!");
             }
         }
 
-        // ناردنی کۆد بۆ گیتھاب (Buildozer)
-        function sendToBuildozer() {
-            const code = document.getElementById('pythonCode').value;
-            if(!code) {
-                alert("تکایە سەرەتا کۆدی پایتۆن بنووسە!");
-                return;
-            }
-            // لێرە پڕۆسەی ناردن بۆ GitHub Actions دەستپێدەکات
-            alert("کۆدەکە وەرگیرا! مەکینەی Buildozer دەستی بە کار کرد بۆ دروستکردنی APK. تکایە چاوەڕێی نامەی واتسئەپ بکە.");
-        }
+        function stopCamera() {
+            const video = document.getElementById('video');
+            const section = document.getElementById('camera-section');
+            const openBtn = document.getElementById('toggleBtn');
+            const closeBtn = document.getElementById('closeBtn');
 
-        // دەستپێکردنی کامێرا لەگەڵ کردنەوەی لاپەڕە
-        window.onload = initCamera;
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop()); // کوژاندنەوەی کامێرا بە تەواوی
+                video.srcObject = null;
+            }
+            section.style.display = "none";
+            openBtn.style.display = "inline-block";
+            closeBtn.style.display = "none";
+        }
     </script>
 </body>
 </html>
