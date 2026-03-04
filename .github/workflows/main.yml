@@ -1,36 +1,36 @@
-<!DOCTYPE html>
-<html lang="ku" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>K-Store | AI Factory</title>
-    <style>
-        :root {
-            --primary: #00d2ff;
-            --secondary: #3a7bd5;
-            --bg: #0b1418;
-            --card-bg: #16242a;
-            --accent: #55efc4;
-        }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: white; margin: 0; padding: 15px; }
-        .header { text-align: center; padding: 20px 0; border-bottom: 2px solid var(--card-bg); margin-bottom: 20px; }
-        .header h1 { color: var(--primary); margin: 0; font-size: 2.2em; letter-spacing: 2px; }
-        .header p { color: #888; margin-top: 5px; }
+name: Build APK (K-Factory)
+on:
+  workflow_dispatch: # ئەمە ڕێگەت پێ دەدات بە دەستی کارای بکەیت
 
-        /* بەشی کۆگاکان */
-        .store-container { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 25px; }
-        .store-item { background: var(--card-bg); padding: 15px 5px; border-radius: 12px; text-align: center; border: 1px solid #243b46; transition: 0.3s; cursor: pointer; }
-        .store-item:active { transform: scale(0.95); background: var(--secondary); }
-        .store-item i { font-size: 28px; display: block; margin-bottom: 8px; }
-        .store-item span { font-size: 0.85em; font-weight: bold; }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-        /* بەشی کامێرا */
-        .camera-box { position: relative; width: 100%; max-width: 450px; margin: 0 auto 20px; border: 3px solid var(--primary); border-radius: 20px; overflow: hidden; background: #000; box-shadow: 0 0 15px rgba(0, 210, 255, 0.2); }
-        video { width: 100%; display: block; }
-        .scan-line { position: absolute; width: 100%; height: 2px; background: var(--accent); top: 0; left: 0; animation: scan 2s linear infinite; box-shadow: 0 0 8px var(--accent); }
-        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
 
-        /* بەشی نووسینی کۆد */
-        .editor-container { background: var(--card-bg); padding: 15px; border-radius: 15px; border: 1px solid #243b46; }
-        .editor-container h3 { margin-top: 0; color: var(--primary); font-size: 1em; }
-        textarea { width: 100%; height: 150px; background: #050a0c; color: var(--accent); border: 1px solid #243b46; border-radius: 10px; padding: 12px; box-sizing: border
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+          pip install --upgrade pip
+          pip install buildozer cython kivy kivymd
+
+      - name: Build with Buildozer
+        run: |
+          # لێرە مەکینەکە دەست دەکات بە گۆڕینی کۆدی پایتۆن بۆ APK
+          buildozer init
+          # دەستکاری کردنی پێداویستییەکان بۆ ئەوەی KivyMD تێدابێت
+          sed -i 's/requirements = python3,kivy/requirements = python3,kivy,kivymd,pillow/g' buildozer.spec
+          buildozer -v android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: K-Store-App
+          path: bin/*.apk
